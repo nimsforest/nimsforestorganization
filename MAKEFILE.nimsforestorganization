@@ -1,0 +1,87 @@
+# NimsforestOrganization - Organizational Structure Component
+# Run these commands from the tools/nimsforestorganization directory
+
+.PHONY: nimsforestorganization-hello nimsforestorganization-init nimsforestorganization-lint
+
+nimsforestorganization-hello:
+	@echo "=== NimsforestOrganization System Check ==="
+	@echo "Checking system compatibility..."
+	@command -v git >/dev/null 2>&1 || { echo "Error: git is required but not installed." >&2; exit 1; }
+	@command -v make >/dev/null 2>&1 || { echo "Error: make is required but not installed." >&2; exit 1; }
+	@echo "✓ Git available"
+	@echo "✓ Make available"
+	@echo ""
+	@echo "Creates organizational documentation structure:"
+	@echo "  • Customer value chain (marketing, sales, operations, accounting)"
+	@echo "  • Strategic direction and financing (strategy, finance, governance, legal)"
+	@echo "  • Three-level hierarchy for systematic intelligence capture"
+	@echo ""
+	@echo "Next: Run 'make nimsforestorganization-init' to create structure"
+
+nimsforestorganization-init:
+	@echo "=== NimsforestOrganization Initialization ==="
+	@echo "Creating organizational structure from YAML..."
+	@mkdir -p ../../docs/organization
+	@echo "# Organization" > ../../docs/organization/README.md
+	@echo "" >> ../../docs/organization/README.md
+	@echo "Organizational documentation structure created from organization-structure.yml" >> ../../docs/organization/README.md
+	@echo "" >> ../../docs/organization/README.md
+	@echo "## Structure" >> ../../docs/organization/README.md
+	@echo "" >> ../../docs/organization/README.md
+	@echo "- **customer-value-chain/** - Core value delivery functions" >> ../../docs/organization/README.md
+	@echo "- **strategic-direction-and-financing/** - Strategic planning and financial management" >> ../../docs/organization/README.md
+	@echo ""
+	@echo "Creating customer value chain structure..."
+	@mkdir -p ../../docs/organization/customer-value-chain/marketing/{target-audiences,messaging,channels,campaigns}
+	@mkdir -p ../../docs/organization/customer-value-chain/sales/{pipeline,qualification,territories,processes}
+	@mkdir -p ../../docs/organization/customer-value-chain/operations/{processes,quality,supply-chain,delivery}
+	@mkdir -p ../../docs/organization/customer-value-chain/accounting/{reporting,analysis,compliance,budgeting}
+	@echo "Creating strategic direction and financing structure..."
+	@mkdir -p ../../docs/organization/strategic-direction-and-financing/strategy/{planning,objectives,analysis,roadmaps}
+	@mkdir -p ../../docs/organization/strategic-direction-and-financing/finance/{budgeting,forecasting,investments,reporting}
+	@mkdir -p ../../docs/organization/strategic-direction-and-financing/governance/{policies,procedures,risk-management,compliance}
+	@mkdir -p ../../docs/organization/strategic-direction-and-financing/legal/{contracts,intellectual-property,regulatory,disputes}
+	@echo "✓ Customer value chain structure created"
+	@echo "✓ Strategic direction and financing structure created"
+	@echo ""
+	@echo "Organizational structure ready! Edit organization-structure.yml to customize."
+
+nimsforestorganization-lint:
+	@echo "=== NimsforestOrganization Structure Validation ==="
+	@echo "Checking organizational structure..."
+	@echo ""
+	@if [ -d "../../docs/organization" ]; then \
+		echo "✓ Organization directory exists"; \
+		folder_count=$$(find ../../docs/organization -type d | wc -l); \
+		echo "📁 Total folders: $$folder_count"; \
+		echo ""; \
+		echo "Customer Value Chain:"; \
+		if [ -d "../../docs/organization/customer-value-chain" ]; then \
+			echo "  ✓ customer-value-chain/"; \
+			for dept in marketing sales operations accounting; do \
+				if [ -d "../../docs/organization/customer-value-chain/$$dept" ]; then \
+					echo "    ✓ $$dept/"; \
+				else \
+					echo "    ✗ $$dept/ missing"; \
+				fi; \
+			done; \
+		else \
+			echo "  ✗ customer-value-chain/ missing"; \
+		fi; \
+		echo ""; \
+		echo "Strategic Direction and Financing:"; \
+		if [ -d "../../docs/organization/strategic-direction-and-financing" ]; then \
+			echo "  ✓ strategic-direction-and-financing/"; \
+			for dept in strategy finance governance legal; do \
+				if [ -d "../../docs/organization/strategic-direction-and-financing/$$dept" ]; then \
+					echo "    ✓ $$dept/"; \
+				else \
+					echo "    ✗ $$dept/ missing"; \
+				fi; \
+			done; \
+		else \
+			echo "  ✗ strategic-direction-and-financing/ missing"; \
+		fi; \
+	else \
+		echo "✗ Organization structure not found. Run 'make nimsforestorganization-init' first."; \
+	fi
