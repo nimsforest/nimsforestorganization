@@ -1,7 +1,7 @@
 # NimsforestOrganization - Organizational Structure Component
 # Run these commands from the tools/nimsforestorganization directory
 
-.PHONY: nimsforestorganization-hello nimsforestorganization-init nimsforestorganization-lint nimsforestorganization-addtomainmake nimsforestorganization-create-folder-structure nimsforestorganization-create-folder-structure-yml
+.PHONY: nimsforestorganization-hello nimsforestorganization-init nimsforestorganization-lint nimsforestorganization-addtomainmake nimsforestorganization-create-folder-structure
 
 nimsforestorganization-hello:
 	@echo "=== NimsforestOrganization System Check ==="
@@ -25,42 +25,63 @@ nimsforestorganization-init:
 
 nimsforestorganization-lint:
 	@echo "=== NimsforestOrganization Structure Validation ==="
-	@echo "Checking organizational structure against YAML..."
+	@echo "Checking organizational structure..."
 	@echo ""
 	@if [ -d "$${DOCS_PATH:-../../docs}/organization" ]; then \
 		echo "✓ Organization directory exists"; \
 		folder_count=$$(find $${DOCS_PATH:-../../docs}/organization -type d | wc -l); \
 		echo "📁 Total folders: $$folder_count"; \
 		echo ""; \
-		if [ -f "organization-structure.yml" ]; then \
-			echo "Validating against organization-structure.yml:"; \
-			failed=0; \
-			while IFS= read -r line; do \
-				if echo "$$line" | grep -q "^  [a-z-]*:$$"; then \
-					category=$$(echo "$$line" | sed 's/^  //; s/:$$//'); \
-				elif echo "$$line" | grep -q "^    [a-z-]*:$$"; then \
-					dept=$$(echo "$$line" | sed 's/^    //; s/:$$//'); \
-				elif echo "$$line" | grep -q "^      - "; then \
-					subdir=$$(echo "$$line" | sed 's/^      - //'); \
-					path="$${DOCS_PATH:-../../docs}/organization/$$category/$$dept/$$subdir"; \
-					if [ -d "$$path" ]; then \
-						echo "  ✓ $$category/$$dept/$$subdir"; \
-					else \
-						echo "  ✗ $$category/$$dept/$$subdir missing"; \
-						failed=1; \
-					fi; \
-				fi; \
-			done < organization-structure.yml; \
-			if [ $$failed -eq 1 ]; then \
-				echo ""; \
-				echo "❌ Structure validation failed"; \
-				exit 1; \
+		echo "Validating expected structure:"; \
+		failed=0; \
+		for path in \
+			"customer-value-chain/marketing/target-audiences" \
+			"customer-value-chain/marketing/messaging" \
+			"customer-value-chain/marketing/channels" \
+			"customer-value-chain/marketing/campaigns" \
+			"customer-value-chain/sales/pipeline" \
+			"customer-value-chain/sales/qualification" \
+			"customer-value-chain/sales/territories" \
+			"customer-value-chain/sales/processes" \
+			"customer-value-chain/operations/processes" \
+			"customer-value-chain/operations/quality" \
+			"customer-value-chain/operations/supply-chain" \
+			"customer-value-chain/operations/delivery" \
+			"customer-value-chain/accounting/reporting" \
+			"customer-value-chain/accounting/analysis" \
+			"customer-value-chain/accounting/compliance" \
+			"customer-value-chain/accounting/budgeting" \
+			"strategic-direction-and-financing/strategy/planning" \
+			"strategic-direction-and-financing/strategy/objectives" \
+			"strategic-direction-and-financing/strategy/analysis" \
+			"strategic-direction-and-financing/strategy/roadmaps" \
+			"strategic-direction-and-financing/finance/budgeting" \
+			"strategic-direction-and-financing/finance/forecasting" \
+			"strategic-direction-and-financing/finance/investments" \
+			"strategic-direction-and-financing/finance/reporting" \
+			"strategic-direction-and-financing/governance/policies" \
+			"strategic-direction-and-financing/governance/procedures" \
+			"strategic-direction-and-financing/governance/risk-management" \
+			"strategic-direction-and-financing/governance/compliance" \
+			"strategic-direction-and-financing/legal/contracts" \
+			"strategic-direction-and-financing/legal/intellectual-property" \
+			"strategic-direction-and-financing/legal/regulatory" \
+			"strategic-direction-and-financing/legal/disputes"; do \
+			full_path="$${DOCS_PATH:-../../docs}/organization/$$path"; \
+			if [ -d "$$full_path" ]; then \
+				echo "  ✓ $$path"; \
 			else \
-				echo ""; \
-				echo "✅ All directories from YAML exist"; \
+				echo "  ✗ $$path missing"; \
+				failed=1; \
 			fi; \
+		done; \
+		if [ $$failed -eq 1 ]; then \
+			echo ""; \
+			echo "❌ Structure validation failed"; \
+			exit 1; \
 		else \
-			echo "✗ organization-structure.yml not found"; \
+			echo ""; \
+			echo "✅ All expected directories exist"; \
 		fi; \
 	else \
 		echo "✗ Organization structure not found. Run 'make nimsforestorganization-init' first."; \
@@ -82,18 +103,11 @@ nimsforestorganization-addtomainmake:
 	@echo "✓ NimsforestOrganization targets available via main Makefile"
 
 nimsforestorganization-create-folder-structure:
-	@echo "Processing organization-structure.yml..."
-	@if [ -f "organization-structure.yml" ]; then \
-		echo "Using existing organization-structure.yml"; \
-	else \
-		echo "Creating default organization-structure.yml"; \
-		$(MAKE) -f $(firstword $(MAKEFILE_LIST)) nimsforestorganization-create-folder-structure-yml; \
-	fi
-	@echo "Creating directory structure..."
+	@echo "Creating organizational directory structure..."
 	@mkdir -p $${DOCS_PATH:-../../docs}/organization
 	@echo "# Organization" > $${DOCS_PATH:-../../docs}/organization/README.md
 	@echo "" >> $${DOCS_PATH:-../../docs}/organization/README.md
-	@echo "Organizational documentation structure created from organization-structure.yml" >> $${DOCS_PATH:-../../docs}/organization/README.md
+	@echo "Organizational documentation structure" >> $${DOCS_PATH:-../../docs}/organization/README.md
 	@echo "" >> $${DOCS_PATH:-../../docs}/organization/README.md
 	@echo "## Structure" >> $${DOCS_PATH:-../../docs}/organization/README.md
 	@echo "" >> $${DOCS_PATH:-../../docs}/organization/README.md
@@ -133,51 +147,5 @@ nimsforestorganization-create-folder-structure:
 	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/legal/disputes
 	@echo "- **customer-value-chain/** - Core value delivery functions" >> $${DOCS_PATH:-../../docs}/organization/README.md
 	@echo "- **strategic-direction-and-financing/** - Strategic planning and financial management" >> $${DOCS_PATH:-../../docs}/organization/README.md
-	@echo "✓ Organizational structure created from YAML"
+	@echo "✓ Organizational structure created"
 
-nimsforestorganization-create-folder-structure-yml:
-	@echo "organization:" > organization-structure.yml
-	@echo "  customer-value-chain:" >> organization-structure.yml
-	@echo "    description: Core value delivery functions" >> organization-structure.yml
-	@echo "    marketing:" >> organization-structure.yml
-	@echo "      - target-audiences" >> organization-structure.yml
-	@echo "      - messaging" >> organization-structure.yml
-	@echo "      - channels" >> organization-structure.yml
-	@echo "      - campaigns" >> organization-structure.yml
-	@echo "    sales:" >> organization-structure.yml
-	@echo "      - pipeline" >> organization-structure.yml
-	@echo "      - qualification" >> organization-structure.yml
-	@echo "      - territories" >> organization-structure.yml
-	@echo "      - processes" >> organization-structure.yml
-	@echo "    operations:" >> organization-structure.yml
-	@echo "      - processes" >> organization-structure.yml
-	@echo "      - quality" >> organization-structure.yml
-	@echo "      - supply-chain" >> organization-structure.yml
-	@echo "      - delivery" >> organization-structure.yml
-	@echo "    accounting:" >> organization-structure.yml
-	@echo "      - reporting" >> organization-structure.yml
-	@echo "      - analysis" >> organization-structure.yml
-	@echo "      - compliance" >> organization-structure.yml
-	@echo "      - budgeting" >> organization-structure.yml
-	@echo "  strategic-direction-and-financing:" >> organization-structure.yml
-	@echo "    description: Strategic planning and financial management" >> organization-structure.yml
-	@echo "    strategy:" >> organization-structure.yml
-	@echo "      - planning" >> organization-structure.yml
-	@echo "      - objectives" >> organization-structure.yml
-	@echo "      - analysis" >> organization-structure.yml
-	@echo "      - roadmaps" >> organization-structure.yml
-	@echo "    finance:" >> organization-structure.yml
-	@echo "      - budgeting" >> organization-structure.yml
-	@echo "      - forecasting" >> organization-structure.yml
-	@echo "      - investments" >> organization-structure.yml
-	@echo "      - reporting" >> organization-structure.yml
-	@echo "    governance:" >> organization-structure.yml
-	@echo "      - policies" >> organization-structure.yml
-	@echo "      - procedures" >> organization-structure.yml
-	@echo "      - risk-management" >> organization-structure.yml
-	@echo "      - compliance" >> organization-structure.yml
-	@echo "    legal:" >> organization-structure.yml
-	@echo "      - contracts" >> organization-structure.yml
-	@echo "      - intellectual-property" >> organization-structure.yml
-	@echo "      - regulatory" >> organization-structure.yml
-	@echo "      - disputes" >> organization-structure.yml
