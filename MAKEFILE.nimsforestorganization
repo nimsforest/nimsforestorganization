@@ -1,7 +1,7 @@
 # NimsforestOrganization - Organizational Structure Component
 # Run these commands from the tools/nimsforestorganization directory
 
-.PHONY: nimsforestorganization-hello nimsforestorganization-init nimsforestorganization-lint
+.PHONY: nimsforestorganization-hello nimsforestorganization-init nimsforestorganization-lint nimsforestorganization-addtomainmake nimsforestorganization-create-folder-structure nimsforestorganization-create-folder-structure-yml
 
 nimsforestorganization-hello:
 	@echo "=== NimsforestOrganization System Check ==="
@@ -21,67 +21,163 @@ nimsforestorganization-hello:
 nimsforestorganization-init:
 	@echo "=== NimsforestOrganization Initialization ==="
 	@echo "Creating organizational structure from YAML..."
-	@mkdir -p ../../docs/organization
-	@echo "# Organization" > ../../docs/organization/README.md
-	@echo "" >> ../../docs/organization/README.md
-	@echo "Organizational documentation structure created from organization-structure.yml" >> ../../docs/organization/README.md
-	@echo "" >> ../../docs/organization/README.md
-	@echo "## Structure" >> ../../docs/organization/README.md
-	@echo "" >> ../../docs/organization/README.md
-	@echo "- **customer-value-chain/** - Core value delivery functions" >> ../../docs/organization/README.md
-	@echo "- **strategic-direction-and-financing/** - Strategic planning and financial management" >> ../../docs/organization/README.md
-	@echo ""
-	@echo "Creating customer value chain structure..."
-	@mkdir -p ../../docs/organization/customer-value-chain/marketing/{target-audiences,messaging,channels,campaigns}
-	@mkdir -p ../../docs/organization/customer-value-chain/sales/{pipeline,qualification,territories,processes}
-	@mkdir -p ../../docs/organization/customer-value-chain/operations/{processes,quality,supply-chain,delivery}
-	@mkdir -p ../../docs/organization/customer-value-chain/accounting/{reporting,analysis,compliance,budgeting}
-	@echo "Creating strategic direction and financing structure..."
-	@mkdir -p ../../docs/organization/strategic-direction-and-financing/strategy/{planning,objectives,analysis,roadmaps}
-	@mkdir -p ../../docs/organization/strategic-direction-and-financing/finance/{budgeting,forecasting,investments,reporting}
-	@mkdir -p ../../docs/organization/strategic-direction-and-financing/governance/{policies,procedures,risk-management,compliance}
-	@mkdir -p ../../docs/organization/strategic-direction-and-financing/legal/{contracts,intellectual-property,regulatory,disputes}
-	@echo "✓ Customer value chain structure created"
-	@echo "✓ Strategic direction and financing structure created"
-	@echo ""
-	@echo "Organizational structure ready! Edit organization-structure.yml to customize."
+	@$(MAKE) -f $(firstword $(MAKEFILE_LIST)) nimsforestorganization-create-folder-structure
 
 nimsforestorganization-lint:
 	@echo "=== NimsforestOrganization Structure Validation ==="
-	@echo "Checking organizational structure..."
+	@echo "Checking organizational structure against YAML..."
 	@echo ""
-	@if [ -d "../../docs/organization" ]; then \
+	@if [ -d "$${DOCS_PATH:-../../docs}/organization" ]; then \
 		echo "✓ Organization directory exists"; \
-		folder_count=$$(find ../../docs/organization -type d | wc -l); \
+		folder_count=$$(find $${DOCS_PATH:-../../docs}/organization -type d | wc -l); \
 		echo "📁 Total folders: $$folder_count"; \
 		echo ""; \
-		echo "Customer Value Chain:"; \
-		if [ -d "../../docs/organization/customer-value-chain" ]; then \
-			echo "  ✓ customer-value-chain/"; \
-			for dept in marketing sales operations accounting; do \
-				if [ -d "../../docs/organization/customer-value-chain/$$dept" ]; then \
-					echo "    ✓ $$dept/"; \
-				else \
-					echo "    ✗ $$dept/ missing"; \
+		if [ -f "organization-structure.yml" ]; then \
+			echo "Validating against organization-structure.yml:"; \
+			failed=0; \
+			while IFS= read -r line; do \
+				if echo "$$line" | grep -q "^  [a-z-]*:$$"; then \
+					category=$$(echo "$$line" | sed 's/^  //; s/:$$//'); \
+				elif echo "$$line" | grep -q "^    [a-z-]*:$$"; then \
+					dept=$$(echo "$$line" | sed 's/^    //; s/:$$//'); \
+				elif echo "$$line" | grep -q "^      - "; then \
+					subdir=$$(echo "$$line" | sed 's/^      - //'); \
+					path="$${DOCS_PATH:-../../docs}/organization/$$category/$$dept/$$subdir"; \
+					if [ -d "$$path" ]; then \
+						echo "  ✓ $$category/$$dept/$$subdir"; \
+					else \
+						echo "  ✗ $$category/$$dept/$$subdir missing"; \
+						failed=1; \
+					fi; \
 				fi; \
-			done; \
+			done < organization-structure.yml; \
+			if [ $$failed -eq 1 ]; then \
+				echo ""; \
+				echo "❌ Structure validation failed"; \
+				exit 1; \
+			else \
+				echo ""; \
+				echo "✅ All directories from YAML exist"; \
+			fi; \
 		else \
-			echo "  ✗ customer-value-chain/ missing"; \
-		fi; \
-		echo ""; \
-		echo "Strategic Direction and Financing:"; \
-		if [ -d "../../docs/organization/strategic-direction-and-financing" ]; then \
-			echo "  ✓ strategic-direction-and-financing/"; \
-			for dept in strategy finance governance legal; do \
-				if [ -d "../../docs/organization/strategic-direction-and-financing/$$dept" ]; then \
-					echo "    ✓ $$dept/"; \
-				else \
-					echo "    ✗ $$dept/ missing"; \
-				fi; \
-			done; \
-		else \
-			echo "  ✗ strategic-direction-and-financing/ missing"; \
+			echo "✗ organization-structure.yml not found"; \
 		fi; \
 	else \
 		echo "✗ Organization structure not found. Run 'make nimsforestorganization-init' first."; \
 	fi
+
+nimsforestorganization-addtomainmake:
+	@echo "=== Adding NimsforestOrganization to main Makefile ==="
+	@if [ ! -f Makefile ]; then \
+		echo "Creating main Makefile..."; \
+		echo "-include MAKEFILE.nimsforestorganization" > Makefile; \
+	else \
+		if ! grep -q "MAKEFILE.nimsforestorganization" Makefile; then \
+			echo "Adding include to existing Makefile..."; \
+			echo "-include MAKEFILE.nimsforestorganization" >> Makefile; \
+		else \
+			echo "✓ Already included in Makefile"; \
+		fi; \
+	fi
+	@echo "✓ NimsforestOrganization targets available via main Makefile"
+
+nimsforestorganization-create-folder-structure:
+	@echo "Processing organization-structure.yml..."
+	@if [ -f "organization-structure.yml" ]; then \
+		echo "Using existing organization-structure.yml"; \
+	else \
+		echo "Creating default organization-structure.yml"; \
+		$(MAKE) -f $(firstword $(MAKEFILE_LIST)) nimsforestorganization-create-folder-structure-yml; \
+	fi
+	@echo "Creating directory structure..."
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization
+	@echo "# Organization" > $${DOCS_PATH:-../../docs}/organization/README.md
+	@echo "" >> $${DOCS_PATH:-../../docs}/organization/README.md
+	@echo "Organizational documentation structure created from organization-structure.yml" >> $${DOCS_PATH:-../../docs}/organization/README.md
+	@echo "" >> $${DOCS_PATH:-../../docs}/organization/README.md
+	@echo "## Structure" >> $${DOCS_PATH:-../../docs}/organization/README.md
+	@echo "" >> $${DOCS_PATH:-../../docs}/organization/README.md
+	@echo "Creating customer value chain structure..."
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/marketing/target-audiences
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/marketing/messaging
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/marketing/channels
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/marketing/campaigns
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/sales/pipeline
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/sales/qualification
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/sales/territories
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/sales/processes
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/operations/processes
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/operations/quality
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/operations/supply-chain
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/operations/delivery
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/accounting/reporting
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/accounting/analysis
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/accounting/compliance
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/accounting/budgeting
+	@echo "Creating strategic direction and financing structure..."
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/strategy/planning
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/strategy/objectives
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/strategy/analysis
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/strategy/roadmaps
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/finance/budgeting
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/finance/forecasting
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/finance/investments
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/finance/reporting
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/governance/policies
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/governance/procedures
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/governance/risk-management
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/governance/compliance
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/legal/contracts
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/legal/intellectual-property
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/legal/regulatory
+	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/legal/disputes
+	@echo "- **customer-value-chain/** - Core value delivery functions" >> $${DOCS_PATH:-../../docs}/organization/README.md
+	@echo "- **strategic-direction-and-financing/** - Strategic planning and financial management" >> $${DOCS_PATH:-../../docs}/organization/README.md
+	@echo "✓ Organizational structure created from YAML"
+
+nimsforestorganization-create-folder-structure-yml:
+	@echo "organization:" > organization-structure.yml
+	@echo "  customer-value-chain:" >> organization-structure.yml
+	@echo "    description: Core value delivery functions" >> organization-structure.yml
+	@echo "    marketing:" >> organization-structure.yml
+	@echo "      - target-audiences" >> organization-structure.yml
+	@echo "      - messaging" >> organization-structure.yml
+	@echo "      - channels" >> organization-structure.yml
+	@echo "      - campaigns" >> organization-structure.yml
+	@echo "    sales:" >> organization-structure.yml
+	@echo "      - pipeline" >> organization-structure.yml
+	@echo "      - qualification" >> organization-structure.yml
+	@echo "      - territories" >> organization-structure.yml
+	@echo "      - processes" >> organization-structure.yml
+	@echo "    operations:" >> organization-structure.yml
+	@echo "      - processes" >> organization-structure.yml
+	@echo "      - quality" >> organization-structure.yml
+	@echo "      - supply-chain" >> organization-structure.yml
+	@echo "      - delivery" >> organization-structure.yml
+	@echo "    accounting:" >> organization-structure.yml
+	@echo "      - reporting" >> organization-structure.yml
+	@echo "      - analysis" >> organization-structure.yml
+	@echo "      - compliance" >> organization-structure.yml
+	@echo "      - budgeting" >> organization-structure.yml
+	@echo "  strategic-direction-and-financing:" >> organization-structure.yml
+	@echo "    description: Strategic planning and financial management" >> organization-structure.yml
+	@echo "    strategy:" >> organization-structure.yml
+	@echo "      - planning" >> organization-structure.yml
+	@echo "      - objectives" >> organization-structure.yml
+	@echo "      - analysis" >> organization-structure.yml
+	@echo "      - roadmaps" >> organization-structure.yml
+	@echo "    finance:" >> organization-structure.yml
+	@echo "      - budgeting" >> organization-structure.yml
+	@echo "      - forecasting" >> organization-structure.yml
+	@echo "      - investments" >> organization-structure.yml
+	@echo "      - reporting" >> organization-structure.yml
+	@echo "    governance:" >> organization-structure.yml
+	@echo "      - policies" >> organization-structure.yml
+	@echo "      - procedures" >> organization-structure.yml
+	@echo "      - risk-management" >> organization-structure.yml
+	@echo "      - compliance" >> organization-structure.yml
+	@echo "    legal:" >> organization-structure.yml
+	@echo "      - contracts" >> organization-structure.yml
+	@echo "      - intellectual-property" >> organization-structure.yml
+	@echo "      - regulatory" >> organization-structure.yml
+	@echo "      - disputes" >> organization-structure.yml

@@ -1,0 +1,9 @@
+.PHONY: test
+test:
+	mkdir -p tmp && \
+	cd tmp && \
+	cp $(CURDIR)/MAKEFILE.nimsforestorganization . && \
+	make -f MAKEFILE.nimsforestorganization nimsforestorganization-addtomainmake && \
+	make nimsforestorganization-hello && \
+	DOCS_PATH=. make nimsforestorganization-init && \
+	DOCS_PATH=. make nimsforestorganization-lint
