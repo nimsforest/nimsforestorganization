@@ -1,6 +1,8 @@
 # NimsforestOrganization - Organizational Structure Component
 # Run these commands from the tools/nimsforestorganization directory
 
+-include ../nimsforestfolders/MAKEFILE.nimsforestfolders
+
 .PHONY: nimsforestorganization-hello nimsforestorganization-init nimsforestorganization-lint nimsforestorganization-addtomainmake nimsforestorganization-create-folder-structure
 
 nimsforestorganization-hello:
@@ -8,8 +10,22 @@ nimsforestorganization-hello:
 	@echo "Checking system compatibility..."
 	@command -v git >/dev/null 2>&1 || { echo "Error: git is required but not installed." >&2; exit 1; }
 	@command -v make >/dev/null 2>&1 || { echo "Error: make is required but not installed." >&2; exit 1; }
+	@command -v jq >/dev/null 2>&1 || { echo "Error: jq is required but not installed." >&2; exit 1; }
 	@echo "✓ Git available"
 	@echo "✓ Make available"
+	@echo "✓ jq available"
+	@echo ""
+	@echo "Checking dependencies..."
+	@if [ -d "../nimsforestfolders" ]; then \
+		echo "✓ nimsforestfolders found at ../nimsforestfolders/"; \
+	else \
+		echo "✗ nimsforestfolders not found at ../nimsforestfolders/"; \
+		echo ""; \
+		echo "To install nimsforestfolders:"; \
+		echo "  cd .. && git clone https://github.com/nimsforest/nimsforestfolders.git"; \
+		echo ""; \
+		exit 1; \
+	fi
 	@echo ""
 	@echo "Creates organizational documentation structure:"
 	@echo "  • Customer value chain (marketing, sales, operations, accounting)"
@@ -32,41 +48,9 @@ nimsforestorganization-lint:
 		folder_count=$$(find $${DOCS_PATH:-../../docs}/organization -type d | wc -l); \
 		echo "📁 Total folders: $$folder_count"; \
 		echo ""; \
-		echo "Validating expected structure:"; \
+		echo "Validating expected structure from JSON:"; \
 		failed=0; \
-		for path in \
-			"customer-value-chain/marketing/target-audiences" \
-			"customer-value-chain/marketing/messaging" \
-			"customer-value-chain/marketing/channels" \
-			"customer-value-chain/marketing/campaigns" \
-			"customer-value-chain/sales/pipeline" \
-			"customer-value-chain/sales/qualification" \
-			"customer-value-chain/sales/territories" \
-			"customer-value-chain/sales/processes" \
-			"customer-value-chain/operations/processes" \
-			"customer-value-chain/operations/quality" \
-			"customer-value-chain/operations/supply-chain" \
-			"customer-value-chain/operations/delivery" \
-			"customer-value-chain/accounting/reporting" \
-			"customer-value-chain/accounting/analysis" \
-			"customer-value-chain/accounting/compliance" \
-			"customer-value-chain/accounting/budgeting" \
-			"strategic-direction-and-financing/strategy/planning" \
-			"strategic-direction-and-financing/strategy/objectives" \
-			"strategic-direction-and-financing/strategy/analysis" \
-			"strategic-direction-and-financing/strategy/roadmaps" \
-			"strategic-direction-and-financing/finance/budgeting" \
-			"strategic-direction-and-financing/finance/forecasting" \
-			"strategic-direction-and-financing/finance/investments" \
-			"strategic-direction-and-financing/finance/reporting" \
-			"strategic-direction-and-financing/governance/policies" \
-			"strategic-direction-and-financing/governance/procedures" \
-			"strategic-direction-and-financing/governance/risk-management" \
-			"strategic-direction-and-financing/governance/compliance" \
-			"strategic-direction-and-financing/legal/contracts" \
-			"strategic-direction-and-financing/legal/intellectual-property" \
-			"strategic-direction-and-financing/legal/regulatory" \
-			"strategic-direction-and-financing/legal/disputes"; do \
+		cat docs/templates/organization-structure.json | jq -r '.organization | to_entries[] | .key as $$dept | .value | to_entries[] | .key as $$func | .value[] | "\($$dept)/\($$func)/\(.)"' | while read path; do \
 			full_path="$${DOCS_PATH:-../../docs}/organization/$$path"; \
 			if [ -d "$$full_path" ]; then \
 				echo "  ✓ $$path"; \
@@ -102,8 +86,9 @@ nimsforestorganization-addtomainmake:
 	fi
 	@echo "✓ NimsforestOrganization targets available via main Makefile"
 
+
 nimsforestorganization-create-folder-structure:
-	@echo "Creating organizational directory structure..."
+	@echo "Creating organizational directory structure from JSON..."
 	@mkdir -p $${DOCS_PATH:-../../docs}/organization
 	@echo "# Organization" > $${DOCS_PATH:-../../docs}/organization/README.md
 	@echo "" >> $${DOCS_PATH:-../../docs}/organization/README.md
@@ -111,40 +96,9 @@ nimsforestorganization-create-folder-structure:
 	@echo "" >> $${DOCS_PATH:-../../docs}/organization/README.md
 	@echo "## Structure" >> $${DOCS_PATH:-../../docs}/organization/README.md
 	@echo "" >> $${DOCS_PATH:-../../docs}/organization/README.md
-	@echo "Creating customer value chain structure..."
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/marketing/target-audiences
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/marketing/messaging
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/marketing/channels
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/marketing/campaigns
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/sales/pipeline
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/sales/qualification
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/sales/territories
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/sales/processes
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/operations/processes
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/operations/quality
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/operations/supply-chain
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/operations/delivery
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/accounting/reporting
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/accounting/analysis
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/accounting/compliance
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/customer-value-chain/accounting/budgeting
-	@echo "Creating strategic direction and financing structure..."
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/strategy/planning
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/strategy/objectives
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/strategy/analysis
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/strategy/roadmaps
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/finance/budgeting
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/finance/forecasting
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/finance/investments
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/finance/reporting
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/governance/policies
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/governance/procedures
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/governance/risk-management
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/governance/compliance
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/legal/contracts
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/legal/intellectual-property
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/legal/regulatory
-	@mkdir -p $${DOCS_PATH:-../../docs}/organization/strategic-direction-and-financing/legal/disputes
+	@$(MAKE) -f $(firstword $(MAKEFILE_LIST)) nimsforestfolders-create-folders \
+		JSON_FILE="docs/templates/organization-structure.json" \
+		BASE_PATH="$${DOCS_PATH:-../../docs}/organization"
 	@echo "- **customer-value-chain/** - Core value delivery functions" >> $${DOCS_PATH:-../../docs}/organization/README.md
 	@echo "- **strategic-direction-and-financing/** - Strategic planning and financial management" >> $${DOCS_PATH:-../../docs}/organization/README.md
 	@echo "✓ Organizational structure created"
