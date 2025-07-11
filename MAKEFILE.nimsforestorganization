@@ -49,7 +49,7 @@ nimsforestorganization-lint:
 		echo ""; \
 		echo "Validating expected structure from JSON:"; \
 		failed=0; \
-		cat docs/templates/organization-structure.json | jq -r '.organization | to_entries[] | .key as $$dept | .value | to_entries[] | .key as $$func | .value[] | "\($$dept)/\($$func)/\(.)"' | while read path; do \
+		cat $(dir $(lastword $(MAKEFILE_LIST)))docs/templates/organization-structure.json | jq -r '.organization | to_entries[] | .key as $$dept | .value | to_entries[] | .key as $$func | .value[] | "\($$dept)/\($$func)/\(.)"' | while read path; do \
 			full_path="$${DOCS_PATH:-../../docs}/organization/$$path"; \
 			if [ -d "$$full_path" ]; then \
 				echo "  ✓ $$path"; \
@@ -72,13 +72,13 @@ nimsforestorganization-lint:
 
 nimsforestorganization-addtomainmake:
 	@echo "=== Adding NimsforestOrganization to main Makefile ==="
-	@if [ ! -f Makefile ]; then \
+	@if [ ! -f ../../Makefile ]; then \
 		echo "Creating main Makefile..."; \
-		echo "-include MAKEFILE.nimsforestorganization" > Makefile; \
+		echo "-include tools/nimsforestorganization/MAKEFILE.nimsforestorganization" > ../../Makefile; \
 	else \
-		if ! grep -q "MAKEFILE.nimsforestorganization" Makefile; then \
+		if ! grep -q "tools/nimsforestorganization/MAKEFILE.nimsforestorganization" ../../Makefile; then \
 			echo "Adding include to existing Makefile..."; \
-			echo "-include MAKEFILE.nimsforestorganization" >> Makefile; \
+			echo "-include tools/nimsforestorganization/MAKEFILE.nimsforestorganization" >> ../../Makefile; \
 		else \
 			echo "✓ Already included in Makefile"; \
 		fi; \
@@ -96,7 +96,7 @@ nimsforestorganization-create-folder-structure:
 	@echo "## Structure" >> $${DOCS_PATH:-../../docs}/organization/README.md
 	@echo "" >> $${DOCS_PATH:-../../docs}/organization/README.md
 	@$(MAKE) -f $(firstword $(MAKEFILE_LIST)) nimsforestfolders-create-folders \
-		JSON_FILE="docs/templates/organization-structure.json" \
+		JSON_FILE="$(dir $(lastword $(MAKEFILE_LIST)))docs/templates/organization-structure.json" \
 		BASE_PATH="$${DOCS_PATH:-../../docs}/organization"
 	@echo "- **customer-value-chain/** - Core value delivery functions" >> $${DOCS_PATH:-../../docs}/organization/README.md
 	@echo "- **strategic-direction-and-financing/** - Strategic planning and financial management" >> $${DOCS_PATH:-../../docs}/organization/README.md
