@@ -5,14 +5,14 @@ NIMSFORESTFOLDERS_PATH ?= ../nimsforestfolders
 .PHONY: test
 test:
 	rm -rf tmp && \
-	mkdir -p tmp/tools/nimsforestorganization && \
-	cd tmp/tools/nimsforestorganization && \
-	cp $(CURDIR)/MAKEFILE.nimsforestorganization . && \
+	mkdir -p tmp/tools/nimsforestorganize && \
+	cd tmp/tools/nimsforestorganize && \
+	cp $(CURDIR)/MAKEFILE.nimsforestorganize . && \
 	cp -r $(CURDIR)/docs . && \
 	echo "-include $(NIMSFORESTFOLDERS_PATH)/MAKEFILE.nimsforestfolders" > ../../Makefile && \
-	make -f MAKEFILE.nimsforestorganization nimsforestorganization-addtomainmake NIMSFORESTFOLDERS_PATH=$(NIMSFORESTFOLDERS_PATH) && \
+	make -f MAKEFILE.nimsforestorganize nimsforestorganize-addtomainmake NIMSFORESTFOLDERS_PATH=$(NIMSFORESTFOLDERS_PATH) && \
 	cd ../.. && \
-	make nimsforestorganization-hello NIMSFORESTFOLDERS_PATH=$(NIMSFORESTFOLDERS_PATH) && \
-	DOCS_PATH=docs make nimsforestorganization-init NIMSFORESTFOLDERS_PATH=$(NIMSFORESTFOLDERS_PATH) && \
-	DOCS_PATH=docs make nimsforestorganization-lint NIMSFORESTFOLDERS_PATH=$(NIMSFORESTFOLDERS_PATH) && \
+	make nimsforestorganize-hello NIMSFORESTFOLDERS_PATH=$(NIMSFORESTFOLDERS_PATH) && \
+	DOCS_PATH=docs make nimsforestorganize-init NIMSFORESTFOLDERS_PATH=$(NIMSFORESTFOLDERS_PATH) && \
+	DOCS_PATH=docs make nimsforestorganize-lint NIMSFORESTFOLDERS_PATH=$(NIMSFORESTFOLDERS_PATH) && \
 	cd ..

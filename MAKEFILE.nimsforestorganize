@@ -1,11 +1,11 @@
-# NimsforestOrganization - Organizational Structure Component
-# Run these commands from the tools/nimsforestorganization directory
+# NimsforestOrganize - Organizational Structure Component
+# Run these commands from the tools/nimsforestorganize directory
 # Requires: nimsforestfolders commands to be available
 
-.PHONY: nimsforestorganization-hello nimsforestorganization-init nimsforestorganization-lint nimsforestorganization-addtomainmake nimsforestorganization-create-folder-structure
+.PHONY: nimsforestorganize-hello nimsforestorganize-init nimsforestorganize-lint nimsforestorganize-addtomainmake nimsforestorganize-create-folder-structure
 
-nimsforestorganization-hello:
-	@echo "=== NimsforestOrganization System Check ==="
+nimsforestorganize-hello:
+	@echo "=== NimsforestOrganize System Check ==="
 	@echo "Checking system compatibility..."
 	@command -v git >/dev/null 2>&1 || { echo "Error: git is required but not installed." >&2; exit 1; }
 	@command -v make >/dev/null 2>&1 || { echo "Error: make is required but not installed." >&2; exit 1; }
@@ -31,15 +31,15 @@ nimsforestorganization-hello:
 	@echo "  • Strategic direction and financing (strategy, finance, governance, legal)"
 	@echo "  • Three-level hierarchy for systematic intelligence capture"
 	@echo ""
-	@echo "Next: Run 'make nimsforestorganization-init' to create structure"
+	@echo "Next: Run 'make nimsforestorganize-init' to create structure"
 
-nimsforestorganization-init:
-	@echo "=== NimsforestOrganization Initialization ==="
+nimsforestorganize-init:
+	@echo "=== NimsforestOrganize Initialization ==="
 	@echo "Creating organizational structure from YAML..."
-	@$(MAKE) -f $(firstword $(MAKEFILE_LIST)) nimsforestorganization-create-folder-structure
+	@$(MAKE) -f $(firstword $(MAKEFILE_LIST)) nimsforestorganize-create-folder-structure
 
-nimsforestorganization-lint:
-	@echo "=== NimsforestOrganization Structure Validation ==="
+nimsforestorganize-lint:
+	@echo "=== NimsforestOrganize Structure Validation ==="
 	@echo "Checking organizational structure..."
 	@echo ""
 	@if [ -d "$${DOCS_PATH:-../../docs}/organization" ]; then \
@@ -67,26 +67,26 @@ nimsforestorganization-lint:
 			echo "✅ All expected directories exist"; \
 		fi; \
 	else \
-		echo "✗ Organization structure not found. Run 'make nimsforestorganization-init' first."; \
+		echo "✗ Organization structure not found. Run 'make nimsforestorganize-init' first."; \
 	fi
 
-nimsforestorganization-addtomainmake:
-	@echo "=== Adding NimsforestOrganization to main Makefile ==="
+nimsforestorganize-addtomainmake:
+	@echo "=== Adding NimsforestOrganize to main Makefile ==="
 	@if [ ! -f ../../Makefile ]; then \
 		echo "Creating main Makefile..."; \
-		echo "-include tools/nimsforestorganization/MAKEFILE.nimsforestorganization" > ../../Makefile; \
+		echo "-include tools/nimsforestorganize/MAKEFILE.nimsforestorganize" > ../../Makefile; \
 	else \
-		if ! grep -q "tools/nimsforestorganization/MAKEFILE.nimsforestorganization" ../../Makefile; then \
+		if ! grep -q "tools/nimsforestorganize/MAKEFILE.nimsforestorganize" ../../Makefile; then \
 			echo "Adding include to existing Makefile..."; \
-			echo "-include tools/nimsforestorganization/MAKEFILE.nimsforestorganization" >> ../../Makefile; \
+			echo "-include tools/nimsforestorganize/MAKEFILE.nimsforestorganize" >> ../../Makefile; \
 		else \
 			echo "✓ Already included in Makefile"; \
 		fi; \
 	fi
-	@echo "✓ NimsforestOrganization targets available via main Makefile"
+	@echo "✓ NimsforestOrganize targets available via main Makefile"
 
 
-nimsforestorganization-create-folder-structure:
+nimsforestorganize-create-folder-structure:
 	@echo "Creating organizational directory structure from JSON..."
 	@mkdir -p $${DOCS_PATH:-../../docs}/organization
 	@echo "# Organization" > $${DOCS_PATH:-../../docs}/organization/README.md

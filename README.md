@@ -5,18 +5,18 @@ Creates organizational documentation structure based on YAML configuration. Focu
 ## Quick Setup
 
 ```bash
-git submodule add https://github.com/nimsforest/nimsforestorganization.git tools/nimsforestorganization
-cd tools/nimsforestorganization
-make nimsforestorganization-hello
-make nimsforestorganization-init
+git submodule add https://github.com/nimsforest/nimsforestorganize.git tools/nimsforestorganize
+cd tools/nimsforestorganize
+make nimsforestorganize-hello
+make nimsforestorganize-init
 ```
 
 ## Commands
 
 ```bash
-make nimsforestorganization-hello    # System compatibility check
-make nimsforestorganization-init     # Create docs/organization/ structure from YAML
-make nimsforestorganization-lint     # Validate organization structure
+make nimsforestorganize-hello    # System compatibility check
+make nimsforestorganize-init     # Create docs/organization/ structure from YAML
+make nimsforestorganize-lint     # Validate organization structure
 ```
 
 ## Structure
